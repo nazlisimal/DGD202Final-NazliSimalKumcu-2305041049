@@ -5,15 +5,16 @@ using TMPro;
 public class PelletCollector : MonoBehaviour
 {
     public static PelletCollector Instance;
-    private PelletSpawner _pelletSpawner;
-    private GameController _gameController;
-    private AudioSource _audioSource;
+
+    [Header("References")]
+    [SerializeField] private PelletSpawner _pelletSpawner;
+    [SerializeField] private GameController _gameController;
+    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private TextMeshProUGUI _counter;
-    
-    
+
     private int _numberToCollect;
     private int _numberCollected;
-    
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -22,31 +23,41 @@ public class PelletCollector : MonoBehaviour
         }
         else
         {
-            Instance = this;            
+            Instance = this;
         }
-
-        _gameController = GetComponent<GameController>();
-        _pelletSpawner = GetComponent<PelletSpawner>();
-        _audioSource = GetComponent<AudioSource>();
     }
 
     private void Start()
     {
-        _numberToCollect = _pelletSpawner.NumberToSpawn;
+        if (_pelletSpawner == null) Debug.LogError("PelletSpawner is not assigned!");
+        if (_gameController == null) Debug.LogError("GameController is not assigned!");
+        if (_audioSource == null) Debug.LogError("AudioSource is not assigned!");
+        if (_counter == null) Debug.LogError("Counter Text is not assigned!");
+
+        if (_pelletSpawner != null)
+            _numberToCollect = _pelletSpawner.NumberToSpawn;
+
+        ResetCounter();
     }
 
     public void ResetCounter()
     {
         _numberCollected = 0;
-        _counter.text = "0";
+        if (_counter != null)
+            _counter.text = "0";
     }
-    
+
     public void PelletCollected()
     {
-        _audioSource.PlayOneShot(_audioSource.clip);
+        if (_audioSource != null && _audioSource.clip != null)
+            _audioSource.PlayOneShot(_audioSource.clip);
+
         _numberCollected++;
-        _counter.text = _numberCollected.ToString();
-        if (_numberCollected >= _numberToCollect)
+
+        if (_counter != null)
+            _counter.text = _numberCollected.ToString();
+
+        if (_numberCollected >= _numberToCollect && _gameController != null)
         {
             _gameController.EndGame();
         }
